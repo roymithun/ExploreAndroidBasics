@@ -1,5 +1,7 @@
 package com.inhouse.exploreandroidbasics
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
@@ -16,12 +18,36 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val registerForActivityResult: ActivityResultLauncher<String> =
+        val implicitLauncher: ActivityResultLauncher<String> =
             registerForActivityResult(ActivityResultContracts.GetContent()) {
                 Log.d(TAG, "onActivityResult $it")
                 it?.let { iv_test_result.setImageURI(it) }
             }
 
-        btn_implicit_intent.setOnClickListener { registerForActivityResult.launch("image/*") }
+        btn_implicit_intent.setOnClickListener { implicitLauncher.launch("image/*") }
+
+        val explicitLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                it?.let {
+                    if (it.resultCode == Activity.RESULT_OK) {
+                        it.data?.run {
+                            Log.d(
+                                TAG,
+                                "result key1=${getStringExtra("key1")} | key2=${getStringExtra("key1")} | key3=${
+                                    getStringExtra("key1")
+                                }"
+                            )
+                        }
+                    }
+                }
+            }
+        btn_explicit_intent.setOnClickListener {
+            explicitLauncher.launch(
+                Intent(
+                    this,
+                    SecondaryActivity::class.java
+                )
+            )
+        }
     }
 }
